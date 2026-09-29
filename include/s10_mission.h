@@ -26,17 +26,24 @@ typedef struct
 
 void s10_mission_state_set(
     S10Mission *mission,
-    S10MissionState state);
+    S10MissionState state
+);
 
 S10MissionState s10_mission_state_get(
-    const S10Mission *mission);
+    const S10Mission *mission
+);
 
 void s10_mission_context_init(
     S10MissionContext *context,
-    uint32_t mission_id);
+    uint32_t mission_id
+);
 
 S10Mission *s10_mission_context_get_mission(
-    S10MissionContext *context);
+    S10MissionContext *context
+);
+
 S10Mission *s10_mission_create(uint32_t mission_id);
+
 void s10_mission_reset(S10Mission *mission);
+
 #endif
