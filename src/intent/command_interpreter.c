@@ -52,18 +52,19 @@ Command *interpret_intent(Intent intent, int *out_count)
     }
 
     case PATROL: {
-        // [PATROL_CMD(route_or_area, repetitions), RTH]
-        // No leading GOTO here: unlike SURVEY's area, we don't have any
-        // position-shaped value to hand it (route_or_area is a name/region
-        // reference, not a single point) — resolving that into real
-        // waypoints is entirely waypoint_generator's job downstream.
-        Command *cmds = malloc(2 * sizeof(Command));
+        // [PATROL_CMD(route, lap 1), ..., PATROL_CMD(route, lap N), RTH]
+        int laps = intent.repetitions > 0 ? intent.repetitions : 1;
+        if (laps + 1 > S10_MAX_NODES) { *out_count = 0; return NULL; } // reject, don't truncate
+        int n = laps + 1;
+        Command *cmds = malloc((size_t)n * sizeof(Command));
         if (!cmds) { *out_count = 0; return NULL; }
-        cmds[0] = make_command(PATROL_CMD);
-        set_str(cmds[0].route_or_area, sizeof(cmds[0].route_or_area), intent.route_or_area);
-        cmds[0].repetitions = intent.repetitions;
-        cmds[1] = make_command(RTH);
-        *out_count = 2;
+        for (int i = 0; i < laps; i++) {
+            cmds[i] = make_command(PATROL_CMD);
+            set_str(cmds[i].route_or_area, sizeof(cmds[i].route_or_area), intent.route_or_area);
+            cmds[i].repetitions = 1;
+        }
+        cmds[laps] = make_command(RTH);
+        *out_count = n;
         return cmds;
     }
 
@@ -89,6 +90,36 @@ Command *interpret_intent(Intent intent, int *out_count)
             i++;
         }
         cmds[i] = make_command(LAND_CMD);
+        *out_count = n;
+        return cmds;
+    }
+
+    case TAKEOFF: {
+        // [TAKEOFF_CMD, RTH]
+        Command *cmds = malloc(2 * sizeof(Command));
+        if (!cmds) { *out_count = 0; return NULL; }
+        cmds[0] = make_command(TAKEOFF_CMD);
+        cmds[1] = make_command(RTH);
+        *out_count = 2;
+        return cmds;
+    }
+
+    case LOITER: {
+        // [GOTO(location)?, HOVER(duration), RTH]
+        int has_location = intent.location[0] != '\0';
+        int n = has_location ? 3 : 2;
+        Command *cmds = malloc((size_t)n * sizeof(Command));
+        if (!cmds) { *out_count = 0; return NULL; }
+        int i = 0;
+        if (has_location) {
+            cmds[i] = make_command(GOTO);
+            set_str(cmds[i].position, sizeof(cmds[i].position), intent.location);
+            i++;
+        }
+        cmds[i] = make_command(HOVER);
+        cmds[i].duration_s = intent.duration_s > 0 ? intent.duration_s : 30;
+        i++;
+        cmds[i] = make_command(RTH);
         *out_count = n;
         return cmds;
     }
