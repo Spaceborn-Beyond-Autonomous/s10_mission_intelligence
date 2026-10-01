@@ -1,18 +1,16 @@
 #ifndef S10_GRAPH_H
 #define S10_GRAPH_H
 
-#include "../src/intent/command_interpreter.h"  // for PrimitiveType
+#include "../src/intent/command_interpreter.h"  // for Command, PrimitiveType
 
 typedef struct {
-    int id;                  // unique within this graph; for MVP, the command's index (0, 1, 2...)
-    PrimitiveType type;      // which primitive task this node represents (GOTO, SCAN, RTH, ...)
-    
+    int id;          // unique within this graph; equals the command's index (0, 1, 2...)
+    Command cmd;     // full task data (type, position, duration_s, area, payload, ...)
 } MissionNode;
 
 typedef struct {
-    int from_id;              // id of the MissionNode this edge starts at
-    int to_id;                // id of the MissionNode this edge ends at
-    
+    int from_id;     // id of the MissionNode this edge starts at
+    int to_id;       // id of the MissionNode this edge ends at
 } MissionEdge;
 
 typedef struct {
@@ -20,8 +18,10 @@ typedef struct {
     int node_count;
     MissionEdge *edges;
     int edge_count;
-    // MVP: mission_builder connects nodes in strict recipe order
-    // (node[i] -> node[i+1]), so edge_count == node_count - 1
+    // MVP: strict chain, node[i] -> node[i+1], so edge_count == node_count - 1
 } MissionGraph;
+
+// Frees nodes/edges and zeroes the struct. Safe on an empty or already-freed graph.
+void s10_graph_free(MissionGraph *g);
 
 #endif

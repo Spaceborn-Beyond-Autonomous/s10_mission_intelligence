@@ -6,7 +6,7 @@
 // UNKNOWN=0 is deliberate: an unrecognized command must not silently
 // look like a valid SURVEY (which Intent intent = {0}; would otherwise
 // produce, since SURVEY would default to the enum's zero value)
-typedef enum { UNKNOWN = 0, SURVEY, DELIVER, PATROL, RETURN_TO_BASE, LAND } IntentType;
+typedef enum { UNKNOWN = 0, SURVEY, DELIVER, PATROL, RETURN_TO_BASE, LAND, TAKEOFF, LOITER } IntentType;
 
 typedef struct {
     IntentType type;            // which intent this is; determines which fields below are meaningful
@@ -22,6 +22,7 @@ typedef struct {
     char location[64];           // LAND only, optional: empty = land at current position
 
     int  priority;               // used across multiple intents
+    int duration_s;
 } Intent;
 
 Intent parse_intent(const char *text);

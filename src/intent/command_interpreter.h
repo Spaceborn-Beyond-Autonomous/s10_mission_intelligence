@@ -1,8 +1,10 @@
 #ifndef COMMAND_INTERPRETER_H
 #define COMMAND_INTERPRETER_H
 #include "intent_parser.h"
-
-typedef enum { GOTO, HOVER, SCAN, PICKUP, DROPOFF, LAND_CMD, RTH, PATROL_CMD } PrimitiveType;
+#ifndef S10_MAX_NODES
+#define S10_MAX_NODES 100
+#endif
+typedef enum { GOTO, HOVER, SCAN, PICKUP, DROPOFF, LAND_CMD, RTH, PATROL_CMD, TAKEOFF_CMD } PrimitiveType;
 
 typedef struct {
     PrimitiveType type;
