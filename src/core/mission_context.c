@@ -12,6 +12,8 @@ void s10_mission_context_init(
 
     context->mission.mission_id = mission_id;
     context->mission.state = S10_MISSION_STATE_IDLE;
+    context->mission.graph = (MissionGraph){0};
+    context->mission.current_node_id = 0;
 }
 
 S10Mission *s10_mission_context_get_mission(

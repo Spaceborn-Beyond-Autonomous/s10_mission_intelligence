@@ -2,6 +2,7 @@
 #define S10_MISSION_H
 
 #include <stdint.h>
+#include "s10_graph.h"
 
 typedef enum
 {
@@ -17,6 +18,8 @@ typedef struct
 {
     uint32_t mission_id;
     S10MissionState state;
+    MissionGraph graph;
+    int current_node_id;
 } S10Mission;
 
 typedef struct
