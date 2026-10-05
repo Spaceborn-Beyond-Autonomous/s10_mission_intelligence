@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "s10_graph.h"
+#include "../src/intent/mission_builder.h"
 
 typedef enum
 {
@@ -48,5 +49,10 @@ S10Mission *s10_mission_context_get_mission(
 S10Mission *s10_mission_create(uint32_t mission_id);
 
 void s10_mission_reset(S10Mission *mission);
+
+S10ApplyStatus s10_mission_apply_change(
+    S10Mission *mission,
+    const S10ChangeEvent *event
+);
 
 #endif
