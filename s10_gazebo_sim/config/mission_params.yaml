@@ -1,0 +1,52 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# S10 Mission Intelligence — ROS 2 Node Parameters
+# ─────────────────────────────────────────────────────────────────────────────
+
+mission_intelligence_node:
+  ros__parameters:
+    # Path to the mission intent file loaded at startup
+    mission_file: ""                       # overridden by launch arg
+
+    # Drone flight parameters
+    cruise_altitude: 15.0                  # metres AGL
+    cruise_speed: 5.0                      # m/s
+    waypoint_acceptance_radius: 2.0        # metres — how close is "arrived"
+    max_speed: 8.0                         # m/s (safety cap)
+
+    # Optimization weights  (sum should equal 1.0)
+    weight_fuel: 0.35
+    weight_time: 0.40
+    weight_risk: 0.25
+
+    # Risk zones — flat array of [cx, cy, radius, severity] groups
+    risk_zones: [
+      30.0,  30.0, 15.0, 0.8,
+      -30.0, -25.0, 12.0, 0.6,
+      -40.0,  40.0, 10.0, 0.4
+    ]
+
+    # Obstacle keep-out columns — flat array of [cx, cy, half_width] groups
+    obstacles: [
+      20.0,  15.0,  5.0,
+      -25.0, 30.0,  6.0,
+      35.0, -20.0,  6.0,
+      -15.0,-35.0,  5.5,
+      50.0,  50.0,  7.0,
+      -50.0,-10.0,  7.0
+    ]
+
+    # Safety constraints
+    min_altitude: 5.0                      # metres
+    max_altitude: 50.0                     # metres
+    geofence_radius: 90.0                  # metres from origin
+    max_risk_score: 0.85                   # reject plan if cumulative risk > this
+    fuel_capacity: 100.0                   # abstract units
+    fuel_rate_per_metre: 0.12              # units / metre
+
+    # Replanning
+    replan_trigger_distance: 8.0           # metres — obstacle proximity trigger
+    replan_cooldown: 5.0                   # seconds between replans
+
+    # Publishing rates
+    marker_publish_rate: 2.0               # Hz
+    status_publish_rate: 5.0               # Hz

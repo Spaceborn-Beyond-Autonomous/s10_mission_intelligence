@@ -1,0 +1,105 @@
+Panels:
+  - Class: rviz_common/Displays
+    Help Height: 78
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /Status1
+        - /MarkerArray1
+        - /MarkerArray2
+    Tree Height: 500
+  - Class: rviz_common/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Enabled: true
+      Value: true
+      Cell Size: 10
+      Color: 80; 80; 80
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 20
+      Reference Frame: world
+
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Waypoint Markers
+      Enabled: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /mission_intelligence_node/waypoint_markers
+
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Risk Zone Markers
+      Enabled: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /mission_intelligence_node/risk_zone_markers
+
+    - Class: rviz_default_plugins/Marker
+      Name: S10 Real Drone Model
+      Enabled: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /drone_controller/drone_marker
+
+    - Class: rviz_default_plugins/Path
+      Name: Flight Trajectory
+      Enabled: true
+      Color: 0; 230; 255
+      Alpha: 0.95
+      Line Style: Lines
+      Line Width: 0.08
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /drone_controller/flight_path
+
+  Enabled: true
+  Global Options:
+    Background Color: 30; 30; 40
+    Fixed Frame: world
+    Frame Rate: 30
+
+  Tools:
+    - Class: rviz_default_plugins/Interact
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/FocusCamera
+
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 150
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 10
+      Name: Current View
+      Pitch: 0.7
+      Yaw: 0.8
+      Target Frame: world
