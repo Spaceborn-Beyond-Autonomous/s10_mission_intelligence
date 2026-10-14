@@ -1,0 +1,107 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# S10 Sample Mission Intent
+# ─────────────────────────────────────────────────────────────────────────────
+# This file is the "mission intent" consumed by the Intent Parser.
+# It describes WHAT the operator wants, not HOW to achieve it.
+
+mission:
+  id: "S10-DEMO-001"
+  name: "Perimeter Survey & Inspection"
+  description: >
+    Conduct a perimeter survey of the operational area, inspect three
+    points of interest, and return to the landing pad.
+  priority: HIGH
+  time_limit_seconds: 600            # 10 minutes max
+
+  # Ordered list of tasks forming the mission DAG
+  tasks:
+    - id: takeoff
+      type: TAKEOFF
+      description: "Lift off from landing pad to cruise altitude"
+      params:
+        target_altitude: 15.0
+
+    - id: survey_east
+      type: NAVIGATE
+      description: "Fly to eastern survey start"
+      depends_on: [takeoff]
+      params:
+        target: [10.0, 10.0, 15.0]
+
+    - id: inspect_alpha
+      type: INSPECT
+      description: "Inspect point Alpha (near building cluster)"
+      depends_on: [survey_east]
+      params:
+        target: [40.0, 10.0, 15.0]
+        loiter_seconds: 5
+
+    - id: survey_north
+      type: NAVIGATE
+      description: "Transit to northern sector"
+      depends_on: [inspect_alpha]
+      params:
+        target: [50.0, 40.0, 15.0]
+
+    - id: inspect_beta
+      type: INSPECT
+      description: "Inspect point Beta (elevated vantage)"
+      depends_on: [survey_north]
+      params:
+        target: [20.0, 60.0, 15.0]
+        loiter_seconds: 5
+
+    - id: survey_west
+      type: NAVIGATE
+      description: "Transit to western sector"
+      depends_on: [inspect_beta]
+      params:
+        target: [-20.0, 50.0, 15.0]
+
+    - id: inspect_gamma
+      type: INSPECT
+      description: "Inspect point Gamma (risk zone boundary)"
+      depends_on: [survey_west]
+      params:
+        target: [-40.0, 20.0, 15.0]
+        loiter_seconds: 5
+
+    - id: return_south
+      type: NAVIGATE
+      description: "Return via southern corridor"
+      depends_on: [inspect_gamma]
+      params:
+        target: [-30.0, -10.0, 15.0]
+
+    - id: final_approach
+      type: NAVIGATE
+      description: "Final approach to landing pad"
+      depends_on: [return_south]
+      params:
+        target: [-10.0, -30.0, 15.0]
+
+    - id: rtl
+      type: LAND
+      description: "Return to launch and land"
+      depends_on: [final_approach]
+      params:
+        target: [0.0, 0.0, 0.0]
+
+  # Objectives for multi-objective optimisation
+  objectives:
+    - name: fuel
+      weight: 0.35
+      direction: MINIMIZE
+    - name: time
+      weight: 0.40
+      direction: MINIMIZE
+    - name: risk
+      weight: 0.25
+      direction: MINIMIZE
+
+  # Constraints
+  constraints:
+    geofence_radius: 90.0
+    min_altitude: 5.0
+    max_altitude: 50.0
+    max_cumulative_risk: 0.85
