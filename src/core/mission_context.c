@@ -16,7 +16,8 @@ void s10_mission_context_init(
     context->mission.current_node_id = 0;
 }
 
-S10Mission *s10_mission_context_get_mission(
+S10Mission 
+*s10_mission_context_get_mission(
     S10MissionContext *context
 )
 {
