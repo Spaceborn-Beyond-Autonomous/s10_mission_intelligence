@@ -1,0 +1,338 @@
+<?xml version="1.0" ?>
+<!--
+  S10 Drone Model
+  ===============
+  A simplified quadrotor body (box fuselage + 4 rotor discs) with:
+    • An IMU sensor publishing on /s10_drone/imu
+    • Velocity command interface on /s10_drone/cmd_vel  (Twist)
+    • Odometry output on /s10_drone/odometry            (Odometry)
+  The model uses gz-sim's MulticopterVelocityControl for physics-based flight.
+-->
+<sdf version="1.9">
+  <model name="s10_drone">
+    <pose>0 0 0.25 0 0 0</pose>
+
+    <!-- ─── Main Body ─────────────────────────────────────────────── -->
+    <link name="base_link">
+      <inertial>
+        <mass>1.2</mass>
+        <inertia>
+          <ixx>0.02</ixx><iyy>0.02</iyy><izz>0.04</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
+
+      <!-- Collision geometry (enclosing frame, skids, and propellers) -->
+      <collision name="base_collision">
+        <pose>0 0 -0.01 0 0 0</pose>
+        <geometry>
+          <box><size>0.47 0.47 0.15</size></box>
+        </geometry>
+      </collision>
+
+      <!-- Realistic Aerodynamic Fuselage & Carbon-Fiber Frame Mesh -->
+      <visual name="fuselage_mesh">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://s10_drone/meshes/x3.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <!-- Forward Inspection Camera & Sensor Gimbal Module -->
+      <visual name="camera_gimbal">
+        <pose>0.13 0 -0.035 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.8 0.8 0.8</scale>
+            <uri>model://s10_drone/meshes/vi_camera.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <!-- Aviation Navigation & Strobe Lights -->
+      <!-- Starboard (Right) Navigation Light - Green -->
+      <visual name="nav_led_starboard">
+        <pose>0.13 -0.22 0.04 0 0 0</pose>
+        <geometry><sphere><radius>0.012</radius></sphere></geometry>
+        <material>
+          <ambient>0 1 0.2 1</ambient><diffuse>0 1 0.2 1</diffuse><emissive>0 1 0.2 1</emissive>
+        </material>
+      </visual>
+
+      <!-- Port (Left) Navigation Light - Red -->
+      <visual name="nav_led_port">
+        <pose>0.13 0.22 0.04 0 0 0</pose>
+        <geometry><sphere><radius>0.012</radius></sphere></geometry>
+        <material>
+          <ambient>1 0 0 1</ambient><diffuse>1 0 0 1</diffuse><emissive>1 0 0 1</emissive>
+        </material>
+      </visual>
+
+      <!-- Rear Beacon - Strobe Amber -->
+      <visual name="beacon_rear">
+        <pose>-0.14 0 0.045 0 0 0</pose>
+        <geometry><sphere><radius>0.014</radius></sphere></geometry>
+        <material>
+          <ambient>1 0.6 0 1</ambient><diffuse>1 0.6 0 1</diffuse><emissive>1 0.5 0 1</emissive>
+        </material>
+      </visual>
+
+      <!-- Front Inspection Searchlight - High-Intensity White -->
+      <visual name="searchlight_front">
+        <pose>0.16 0 0.01 0 0 0</pose>
+        <geometry><cylinder><radius>0.014</radius><length>0.015</length></cylinder></geometry>
+        <material>
+          <ambient>0.9 0.9 1 1</ambient><diffuse>0.9 0.9 1 1</diffuse><emissive>0.9 0.9 1 1</emissive>
+        </material>
+      </visual>
+
+      <!-- IMU sensor -->
+      <sensor name="imu_sensor" type="imu">
+        <always_on>true</always_on>
+        <update_rate>250</update_rate>
+        <topic>/s10_drone/imu</topic>
+        <imu>
+          <angular_velocity>
+            <x><noise type="gaussian"><mean>0</mean><stddev>0.0002</stddev></noise></x>
+            <y><noise type="gaussian"><mean>0</mean><stddev>0.0002</stddev></noise></y>
+            <z><noise type="gaussian"><mean>0</mean><stddev>0.0002</stddev></noise></z>
+          </angular_velocity>
+          <linear_acceleration>
+            <x><noise type="gaussian"><mean>0</mean><stddev>0.017</stddev></noise></x>
+            <y><noise type="gaussian"><mean>0</mean><stddev>0.017</stddev></noise></y>
+            <z><noise type="gaussian"><mean>0</mean><stddev>0.017</stddev></noise></z>
+          </linear_acceleration>
+        </imu>
+      </sensor>
+    </link>
+
+    <!-- ─── Rotor Links (4× Realistic Propellers) ─────────────────── -->
+    <!-- Front-Right (CW) -->
+    <link name="rotor_0">
+      <pose>0.13 -0.22 0.023 0 0 0</pose>
+      <inertial><mass>0.02</mass>
+        <inertia><ixx>5.0e-05</ixx><iyy>5.0e-05</iyy><izz>1.0e-04</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <visual name="prop_0">
+        <geometry>
+          <mesh>
+            <scale>0.1 0.1 0.1</scale>
+            <uri>model://s10_drone/meshes/propeller_cw.dae</uri>
+          </mesh>
+        </geometry>
+        <material><ambient>0.2 0.2 0.25 1</ambient><diffuse>0.2 0.2 0.25 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="rotor_0_joint" type="revolute">
+      <parent>base_link</parent><child>rotor_0</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <!-- Front-Left (CCW) -->
+    <link name="rotor_1">
+      <pose>0.13 0.22 0.023 0 0 0</pose>
+      <inertial><mass>0.02</mass>
+        <inertia><ixx>5.0e-05</ixx><iyy>5.0e-05</iyy><izz>1.0e-04</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <visual name="prop_1">
+        <geometry>
+          <mesh>
+            <scale>0.1 0.1 0.1</scale>
+            <uri>model://s10_drone/meshes/propeller_ccw.dae</uri>
+          </mesh>
+        </geometry>
+        <material><ambient>0.2 0.2 0.25 1</ambient><diffuse>0.2 0.2 0.25 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="rotor_1_joint" type="revolute">
+      <parent>base_link</parent><child>rotor_1</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <!-- Rear-Left (CW) -->
+    <link name="rotor_2">
+      <pose>-0.13 0.20 0.023 0 0 0</pose>
+      <inertial><mass>0.02</mass>
+        <inertia><ixx>5.0e-05</ixx><iyy>5.0e-05</iyy><izz>1.0e-04</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <visual name="prop_2">
+        <geometry>
+          <mesh>
+            <scale>0.1 0.1 0.1</scale>
+            <uri>model://s10_drone/meshes/propeller_cw.dae</uri>
+          </mesh>
+        </geometry>
+        <material><ambient>0.2 0.2 0.25 1</ambient><diffuse>0.2 0.2 0.25 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="rotor_2_joint" type="revolute">
+      <parent>base_link</parent><child>rotor_2</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <!-- Rear-Right (CCW) -->
+    <link name="rotor_3">
+      <pose>-0.13 -0.20 0.023 0 0 0</pose>
+      <inertial><mass>0.02</mass>
+        <inertia><ixx>5.0e-05</ixx><iyy>5.0e-05</iyy><izz>1.0e-04</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <visual name="prop_3">
+        <geometry>
+          <mesh>
+            <scale>0.1 0.1 0.1</scale>
+            <uri>model://s10_drone/meshes/propeller_ccw.dae</uri>
+          </mesh>
+        </geometry>
+        <material><ambient>0.2 0.2 0.25 1</ambient><diffuse>0.2 0.2 0.25 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="rotor_3_joint" type="revolute">
+      <parent>base_link</parent><child>rotor_3</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <!-- ─── Multicopter Velocity Control Plugin ───────────────────── -->
+    <plugin filename="gz-sim-multicopter-motor-model-system"
+            name="gz::sim::systems::MulticopterMotorModel">
+      <robotNamespace>s10_drone</robotNamespace>
+      <jointName>rotor_0_joint</jointName>
+      <linkName>rotor_0</linkName>
+      <turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1200.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <actuator_number>0</actuator_number>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/0</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-motor-model-system"
+            name="gz::sim::systems::MulticopterMotorModel">
+      <robotNamespace>s10_drone</robotNamespace>
+      <jointName>rotor_1_joint</jointName>
+      <linkName>rotor_1</linkName>
+      <turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1200.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <actuator_number>1</actuator_number>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/1</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-motor-model-system"
+            name="gz::sim::systems::MulticopterMotorModel">
+      <robotNamespace>s10_drone</robotNamespace>
+      <jointName>rotor_2_joint</jointName>
+      <linkName>rotor_2</linkName>
+      <turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1200.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <actuator_number>2</actuator_number>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/2</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-motor-model-system"
+            name="gz::sim::systems::MulticopterMotorModel">
+      <robotNamespace>s10_drone</robotNamespace>
+      <jointName>rotor_3_joint</jointName>
+      <linkName>rotor_3</linkName>
+      <turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1200.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <actuator_number>3</actuator_number>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/3</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-control-system"
+            name="gz::sim::systems::MulticopterVelocityControl">
+      <robotNamespace>s10_drone</robotNamespace>
+      <commandSubTopic>cmd_vel</commandSubTopic>
+      <enableSubTopic>enable</enableSubTopic>
+      <comLinkName>base_link</comLinkName>
+      <velocityGain>2.7 2.7 2.7</velocityGain>
+      <attitudeGain>2 3 0.15</attitudeGain>
+      <angularRateGain>0.4 0.52 0.18</angularRateGain>
+      <maximumLinearAcceleration>5 5 5</maximumLinearAcceleration>
+      <maximumLinearVelocity>10 10 10</maximumLinearVelocity>
+      <maximumAngularVelocity>5 5 5</maximumAngularVelocity>
+
+      <rotorConfiguration>
+        <rotor>
+          <jointName>rotor_0_joint</jointName>
+          <forceConstant>8.54858e-06</forceConstant>
+          <momentConstant>0.016</momentConstant>
+          <direction>-1</direction>
+        </rotor>
+        <rotor>
+          <jointName>rotor_1_joint</jointName>
+          <forceConstant>8.54858e-06</forceConstant>
+          <momentConstant>0.016</momentConstant>
+          <direction>1</direction>
+        </rotor>
+        <rotor>
+          <jointName>rotor_2_joint</jointName>
+          <forceConstant>8.54858e-06</forceConstant>
+          <momentConstant>0.016</momentConstant>
+          <direction>-1</direction>
+        </rotor>
+        <rotor>
+          <jointName>rotor_3_joint</jointName>
+          <forceConstant>8.54858e-06</forceConstant>
+          <momentConstant>0.016</momentConstant>
+          <direction>1</direction>
+        </rotor>
+      </rotorConfiguration>
+    </plugin>
+
+    <!-- Odometry publisher -->
+    <plugin filename="gz-sim-odometry-publisher-system"
+            name="gz::sim::systems::OdometryPublisher">
+      <odom_topic>/s10_drone/odometry</odom_topic>
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <dimensions>3</dimensions>
+      <odom_publish_frequency>50</odom_publish_frequency>
+    </plugin>
+
+    <!-- Pose publisher for ground-truth -->
+    <plugin filename="gz-sim-pose-publisher-system"
+            name="gz::sim::systems::PosePublisher">
+      <publish_link_pose>true</publish_link_pose>
+      <publish_nested_model_pose>false</publish_nested_model_pose>
+      <update_frequency>50</update_frequency>
+    </plugin>
+
+  </model>
+</sdf>
