@@ -1,0 +1,46 @@
+# scenarios.yaml -- S10 Member 3 planning data
+# Frame: local ENU, metres. Origin (0,0,0) = home/base. x = east, y = north, z = up.
+# All names are lowercase; the resolver lowercases and strips leading
+# "at/the/in/to" from graph text before lookup.
+# NOTE: every number below is placeholder test data, not a real site.
+
+frame: local_enu_m
+
+home: {x: 0, y: 0, z: 0}
+
+defaults:
+  cruise_alt_m: 30
+  cruise_speed_mps: 8
+  pickup_hold_s: 10
+  dropoff_hold_s: 10
+  scan_spacing_m: 20
+  detour_margin_m: 10       # clearance added around a no-fly rectangle
+
+# Single locations: GOTO, PICKUP, DROPOFF, LAND
+points:
+  warehouse:   {x: 150, y: 40}
+  zone b:      {x: 400, y: 300}
+  landing pad: {x: 50,  y: 20}
+
+# Regions: SCAN (lawnmower pattern across the rectangle)
+areas:
+  north field: {x_min: 300, y_min: 500, x_max: 500, y_max: 700}
+
+# Ordered loops: PATROL_CMD (one lap = one pass through the list)
+routes:
+  perimeter:
+    - {x: 0,   y: 0}
+    - {x: 200, y: 0}
+    - {x: 200, y: 200}
+    - {x: 0,   y: 200}
+
+# Cannot be flown through or over. Triggers a detour; a target inside one
+# makes the route infeasible.
+no_fly:
+  airport zone: {x_min: 200, y_min: 100, x_max: 300, y_max: 220}
+
+# Flyable but degraded localization (S04 context). Not blocked; adds risk
+# in cost_model via the risk-stub. Placeholder until Member 4's risk
+# estimator provides real values.
+gps_denied:
+  urban canyon: {x_min: 320, y_min: 120, x_max: 380, y_max: 260}

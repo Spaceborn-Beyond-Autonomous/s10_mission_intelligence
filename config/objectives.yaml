@@ -1,0 +1,33 @@
+# objectives.yaml -- S10 Member 3 optimization settings
+# Every section is  section -> key -> number  (same shape as network.yaml),
+# so the libyaml event loader needs no sequence handling.
+# NOTE: all numbers are placeholder tuning values, not measurements.
+
+# How much each objective matters. Must be >= 0 and not all zero.
+weights:
+  fuel: 0.4
+  time: 0.4
+  risk: 0.2
+
+# Scales that make the three terms comparable (see objective_manager.h).
+# A route costing exactly these values scores 1.0 on that axis.
+references:
+  fuel:   1000.0
+  time_s: 600.0
+
+# Constants of the simple cost model.
+cost:
+  fuel_per_m:            1.0     # fuel per metre when flying at fuel_ref_speed_mps
+  fuel_ref_speed_mps:    8.0     # speed at which fuel_per_m applies
+  fuel_speed_exponent:   2.0     # fuel per metre scales as (speed / ref)^exponent
+  fuel_per_hover_s:      0.5
+  gps_denied_risk_per_s: 0.01
+
+# Speed profiles the optimizer tries. Each value multiplies the speed of
+# every waypoint in the baseline route. 1 to 4 profiles, all > 0.
+# Every profile is tried twice: once flying straight through GPS-denied
+# zones, once routing around them (see route_optimizer.h).
+speed_profiles:
+  eco:    0.6
+  cruise: 1.0
+  fast:   1.5
