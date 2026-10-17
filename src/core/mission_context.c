@@ -18,7 +18,7 @@ void s10_mission_context_init(
 
 S10Mission 
 *s10_mission_context_get_mission(
-    S10MissionContext *context
+S10MissionContext *context
 )
 {
     if (context == 0)

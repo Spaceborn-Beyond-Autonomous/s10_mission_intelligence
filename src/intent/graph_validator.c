@@ -72,8 +72,11 @@ S10GraphResult s10_graph_validate(const MissionGraph *g)
             case GOTO:       if (c->position[0] == '\0')      return fail(S10_GRAPH_MISSING_PARAM, i); break;
             case HOVER:      if (c->duration_s <= 0)          return fail(S10_GRAPH_MISSING_PARAM, i); break;
             case SCAN:       if (c->area[0] == '\0')          return fail(S10_GRAPH_MISSING_PARAM, i); break;
-            case PATROL_CMD: if (c->route_or_area[0] == '\0' || c->repetitions != 1)
-                                                              return fail(S10_GRAPH_MISSING_PARAM, i); break;
+            case PATROL_CMD:
+                if (c->route_or_area[0] == '\0' || c->repetitions != 1) {
+                    return fail(S10_GRAPH_MISSING_PARAM, i);
+                }
+                break;
             default: break;  // PICKUP/DROPOFF payload is optional; RTH, LAND_CMD, TAKEOFF_CMD need nothing
         }
     }
